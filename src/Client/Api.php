@@ -2,6 +2,7 @@
 
 namespace Keycloak\Client;
 
+use JsonException;
 use Keycloak\Client\Entity\Client;
 use Keycloak\Exception\KeycloakException;
 use Keycloak\KeycloakClient;
@@ -143,7 +144,7 @@ class Api
      * @param Role $role
      * @param string $clientId
      * @return string id of newly created role
-     * @throws KeycloakException
+     * @throws KeycloakException|JsonException
      */
     public function createRole(Role $role, string $clientId): string
     {
@@ -153,7 +154,7 @@ class Api
             return $this->extractRIDFromCreateResponse($res);
         }
 
-        $error = json_decode($res->getBody()->getContents(), true) ?? [];
+        $error = json_decode($res->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR) ?? [];
         if (!empty($error['errorMessage']) && $res->getStatusCode() === 409) {
             throw new KeycloakException($error['errorMessage']);
         }
