@@ -36,7 +36,7 @@ class ClientRoleTest extends TestCase
         $this->clientApi = new ClientApi($client);
         $this->role = new Role(
             'roleId',
-            'role_old',
+            'role',
             'description',
             true,
             true
@@ -60,27 +60,32 @@ class ClientRoleTest extends TestCase
     public function testCreateRole(): void
     {
         $client = $this->clientApi->findByClientId($_SERVER['KC_CLIENT_ID']);
-        $this->assertInstanceOf(Client::class, $client);
+        self::assertInstanceOf(Client::class, $client);
+        $existingRole = $this->clientApi->getRole($this->role, $client->id);
+        if ($existingRole !== null) {
+            $this->clientApi->deleteRole($this->role->name, $client->id);
+        }
+
         $roleId = $this->clientApi->createRole($this->role, $client->id);
-        $this->assertNotEmpty($roleId);
+        self::assertNotEmpty($roleId);
     }
 
     public function testUpdateRole(): void
     {
         $client = $this->clientApi->findByClientId($_SERVER['KC_CLIENT_ID']);
-        $this->assertInstanceOf(Client::class, $client);
-        $this->clientApi->updateRole($this->role, $client->id, 'role');
+        self::assertInstanceOf(Client::class, $client);
+        $this->clientApi->updateRole($this->role, $client->id);
         $this->role = $this->clientApi->getRole($this->role, $client->id);
-        $this->assertEquals('role', $this->role->name);
+        self::assertEquals('role', $this->role->name);
     }
 
     public function testCreatePermissions(): void
     {
         $client = $this->clientApi->findByClientId($_SERVER['KC_CLIENT_ID']);
         $permission1 = $this->clientApi->createRole($this->permission1, $client->id);
-        $this->assertNotEmpty($permission1);
+        self::assertNotEmpty($permission1);
         $permission2 = $this->clientApi->createRole($this->permission2, $client->id);
-        $this->assertNotEmpty($permission2);
+        self::assertNotEmpty($permission2);
     }
 
     public function testAddPermissionsToRole(): void
@@ -107,15 +112,7 @@ class ClientRoleTest extends TestCase
         $this->assertNull($deletedPermission2);
     }
 
-    public function testDeleteRole(): void
-    {
-        $client = $this->clientApi->findByClientId($_SERVER['KC_CLIENT_ID']);
-        $this->role->name = 'role';
-        $role = $this->clientApi->getRole($this->role, $client->id);
-        $this->clientApi->deleteRole($role->name, $client->id);
-        $deletedRole = $this->clientApi->getRole($role, $client->id);
-        $this->assertNull($deletedRole);
-    }
+
 
     public function testGetRoles(): void
     {
