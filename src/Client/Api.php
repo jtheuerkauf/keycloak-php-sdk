@@ -40,7 +40,7 @@ class Api
                 ->getBody()
                 ->getContents());
         } catch (KeycloakException $ex) {
-            if ($ex->getPrevious()->getCode() !== 404) {
+            if ($ex->getPrevious() === null || $ex->getPrevious()->getCode() !== 404) {
                 throw $ex;
             }
         }
@@ -92,7 +92,7 @@ class Api
                 ->getBody()
                 ->getContents());
         } catch (KeycloakException $ex) {
-            if ($ex->getPrevious()->getCode() !== 404) {
+            if ($ex->getPrevious() === null || $ex->getPrevious()->getCode() !== 404) {
                 throw $ex;
             }
         }
