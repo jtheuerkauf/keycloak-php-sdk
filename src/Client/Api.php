@@ -79,9 +79,9 @@ class Api
     }
 
     /**
-     * @return Role
      * @param Role $role
      * @param string $clientId
+     * @return Role
      * @throws KeycloakException
      */
     public function getRole(Role $role, string $clientId): ?Role
@@ -102,18 +102,30 @@ class Api
     /**
      * @param string $clientId
      * @param string $roleName
+     * @param int|null $first
+     * @param int|null $max
      * @return User[]
      * @throws KeycloakException
      */
-    public function findUsersByRoleName(string $clientId, string $roleName): array
+    public function findUsersByRoleName(string $clientId, string $roleName, ?int $first, ?int $max): array
     {
         $client = $this->findByClientId($clientId);
         if ($client === null) {
             return [];
         }
 
+        $query = [];
+        if ($first !== null) {
+            $query['first'] = $first;
+        }
+        if ($max !== null) {
+            $query['max'] = $max;
+        }
+
+        $queryString = empty($query) ? '' : '?' . http_build_query($query);
+
         $users = $this->client
-            ->sendRequest('GET', "clients/$client->id/roles/$roleName/users")
+            ->sendRequest('GET', "clients/{$client->id}/roles/{$roleName}/users{$queryString}")
             ->getBody()
             ->getContents();
 
