@@ -3,6 +3,7 @@
 use Keycloak\Exception\KeycloakException;
 use Keycloak\User\Api as UserApi;
 use Keycloak\Client\Api as ClientApi;
+use Keycloak\User\Entity\Credential;
 use Keycloak\User\Entity\Role;
 use Keycloak\User\Entity\User;
 use PHPUnit\Framework\TestCase;
@@ -202,8 +203,8 @@ final class UserTest extends TestCase
         $availableRolesAfterAdd = $this->userApi->getAvailableClientRoles($user->id, $client->id);
         $this->assertLessThan(count($availableRoles), count($availableRolesAfterAdd));
     }
-    
-    public function testAddClientRoleWithMinimalInfo(): void 
+
+    public function testAddClientRoleWithMinimalInfo(): void
     {
         $user = $this->getUser();
         $client = $this->clientApi->findByClientId('realm-management');
@@ -262,6 +263,25 @@ final class UserTest extends TestCase
     {
         $requiredActions = $this->userApi->getRequiredActions();
         $this->assertIsArray($requiredActions);
+    }
+
+    public function testGetCredentials(): void
+    {
+        $user = $this->getUser();
+        $credentials = $this->userApi->getCredentials($user->id);
+        $this->assertCount(1, $credentials);
+        $this->assertInstanceOf(Credential::class, array_pop($credentials));
+    }
+
+    public function testDeleteCredential(): void
+    {
+        $user = $this->getUser();
+        $credentials = $this->userApi->getCredentials($user->id);
+        $credential = array_pop($credentials);
+
+        $this->userApi->deleteCredential($user->id, $credential->id);
+        $credentials = $this->userApi->getCredentials($user->id);
+        $this->assertCount(0, $credentials);
     }
 
     public function testDelete(): void

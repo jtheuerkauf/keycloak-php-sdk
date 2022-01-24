@@ -3,6 +3,7 @@ namespace Keycloak\User;
 
 use Keycloak\Exception\KeycloakException;
 use Keycloak\KeycloakClient;
+use Keycloak\User\Entity\Credential;
 use Keycloak\User\Entity\NewUser;
 use Keycloak\User\Entity\Role;
 use Keycloak\User\Entity\Transformer\RoleTransformer;
@@ -287,5 +288,32 @@ class Api
         return array_map(static function ($action) {
             return $action['alias'];
         }, $requiredActionsArr);
+    }
+
+
+    /**
+     * @param string $id
+     * @return array
+     */
+    public function getCredentials(string $id): array
+    {
+        $credentialsJson = $this->client
+            ->sendRequest('GET', "users/$id/credentials")
+            ->getBody()
+            ->getContents();
+
+        return array_map(static function ($credentialsArr): Credential {
+            return Credential::fromJson($credentialsArr);
+        }, json_decode($credentialsJson, true));
+    }
+
+    /**
+     * @param string $id
+     * @param string $credentialId
+     * @return void
+     */
+    public function deleteCredential(string $id, string $credentialId): void
+    {
+        $this->client->sendRequest('DELETE', "users/$id/credentials/$credentialId");
     }
 }
