@@ -24,12 +24,3 @@ $client->sendRealmlessRequest('POST', '', [
     'id' => $realm,
     'realm' => $realm
 ]);
-
-$smtpConfig = [
-    'smtpServer' => [
-        'port' => $_SERVER['SMTP_PORT'],
-        'host' => $_SERVER['SMTP_HOST'],
-        'from' => $_SERVER['SMTP_FROM']
-    ]
-];
-$client->sendRequest('PUT', '', $smtpConfig);
