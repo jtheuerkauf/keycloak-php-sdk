@@ -1,8 +1,8 @@
 <?php
 
 use Keycloak\Exception\KeycloakException;
-use Keycloak\User\Api as UserApi;
-use Keycloak\Client\Api as ClientApi;
+use Keycloak\User\UserApi;
+use Keycloak\Client\ClientApi;
 use Keycloak\User\Entity\Role;
 use Keycloak\User\Entity\User;
 use PHPUnit\Framework\TestCase;
@@ -202,8 +202,8 @@ final class UserTest extends TestCase
         $availableRolesAfterAdd = $this->userApi->getAvailableClientRoles($user->id, $client->id);
         $this->assertLessThan(count($availableRoles), count($availableRolesAfterAdd));
     }
-    
-    public function testAddClientRoleWithMinimalInfo(): void 
+
+    public function testAddClientRoleWithMinimalInfo(): void
     {
         $user = $this->getUser();
         $client = $this->clientApi->findByClientId('realm-management');

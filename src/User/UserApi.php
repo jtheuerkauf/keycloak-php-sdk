@@ -3,13 +3,13 @@ namespace Keycloak\User;
 
 use Keycloak\Exception\KeycloakException;
 use Keycloak\KeycloakClient;
+use Keycloak\Service\CreateResponseService;
 use Keycloak\User\Entity\NewUser;
 use Keycloak\User\Entity\Role;
 use Keycloak\User\Entity\Transformer\RoleTransformer;
 use Keycloak\User\Entity\User;
-use Psr\Http\Message\ResponseInterface;
 
-class Api
+class UserApi
 {
     /**
      * @var KeycloakClient
@@ -85,32 +85,7 @@ class Api
     public function create(NewUser $newUser): string
     {
         $res = $this->client->sendRequest('POST', 'users', $newUser);
-
-        if ($res->getStatusCode() === 201) {
-            return $this->extractUIDFromCreateResponse($res);
-        }
-
-        $error = json_decode($res->getBody()->getContents(), true) ?? [];
-        if (!empty($error['errorMessage']) && $res->getStatusCode() === 409) {
-            throw new KeycloakException($error['errorMessage']);
-        }
-        throw new KeycloakException('Something went wrong while creating user');
-    }
-
-    /**
-     * @param ResponseInterface $res
-     * @return string
-     * @throws KeycloakException
-     */
-    private function extractUIDFromCreateResponse(ResponseInterface $res): string
-    {
-        $locationHeaders = $res->getHeader('Location');
-        $newUserUrl = reset($locationHeaders);
-        if ($newUserUrl === false) {
-            throw new KeycloakException('Created user but no Location header received');
-        }
-        $urlParts = array_reverse(explode('/', $newUserUrl));
-        return reset($urlParts);
+        return CreateResponseService::handleCreateResponse($res);
     }
 
     /**
@@ -279,7 +254,7 @@ class Api
     public function getRequiredActions(): array
     {
         $requiredActionsJson = $this->client
-            ->sendRequest('GET', "authentication/required-actions")
+            ->sendRequest('GET', 'authentication/required-actions')
             ->getBody()
             ->getContents();
 

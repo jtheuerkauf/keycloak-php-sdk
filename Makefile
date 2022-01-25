@@ -33,7 +33,7 @@ startenv:
 	docker-compose up -d
 
 tests:
-	./vendor/bin/phpunit --bootstrap vendor/autoload.php --testdox tests
+	./vendor/bin/phpunit --bootstrap tests/bootstrap.php --testdox tests
 
 tests_commit:
 	docker exec -it -u nginx web ./vendor/bin/phpunit --bootstrap vendor/autoload.php --testdox tests

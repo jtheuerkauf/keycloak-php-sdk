@@ -1,6 +1,6 @@
 <?php
 
-use Keycloak\Client\Api as ClientApi;
+use Keycloak\Client\ClientApi;
 use Keycloak\Client\Entity\Client;
 use Keycloak\User\Entity\CompositeRole;
 use PHPUnit\Framework\TestCase;
@@ -40,17 +40,11 @@ class ClientTest extends TestCase
         $this->assertNull($this->clientApi->find('blipblop'));
     }
 
-    public function testGetProtocolMappers(): void
-    {
-        $client = $this->clientApi->findByClientId('realm-management');
-        $this->assertNotEmpty($client->protocolMappers);
-    }
-
     public function testGetCompositeRolesWithPermissions(): void
     {
-        $compositeRoles = $this->clientApi->getCompositeRolesWithPermissions('07e9ea75-b6f0-40b7-9bd3-b2d591b37e47');
+        $client = $this->clientApi->findByClientId('realm-management');
+        $compositeRoles = $this->clientApi->getCompositeRolesWithPermissions($client->id);
         $this->assertNotEmpty($compositeRoles);
         $this->assertInstanceOf(CompositeRole::class, $compositeRoles[0]);
     }
-
 }
