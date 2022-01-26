@@ -21,6 +21,8 @@ class AuthenticationExecution implements JsonSerializable, JsonDeserializable
     public $configurable;
     /** @var string */
     public $providerId;
+    /** @var string */
+    public $authenticationConfig;
     /** @var int */
     public $level;
     /** @var int */
@@ -33,6 +35,7 @@ class AuthenticationExecution implements JsonSerializable, JsonDeserializable
         array $requirementChoices,
         bool $configurable,
         string $providerId,
+        string $authenticationConfig,
         int $level,
         int $index
     ) {
@@ -42,6 +45,7 @@ class AuthenticationExecution implements JsonSerializable, JsonDeserializable
         $this->requirementChoices = $requirementChoices;
         $this->configurable = $configurable;
         $this->providerId = $providerId;
+        $this->authenticationConfig = $authenticationConfig;
         $this->level = $level;
         $this->index = $index;
     }
@@ -56,6 +60,7 @@ class AuthenticationExecution implements JsonSerializable, JsonDeserializable
             $arr['requirementChoices'] ?? [],
             $arr['configurable'],
             $arr['providerId'] ?? '',
+            $arr['authenticationConfig'] ?? '',
             $arr['level'],
             $arr['index'],
         );
