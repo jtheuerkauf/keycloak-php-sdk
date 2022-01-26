@@ -1,6 +1,7 @@
 <?php
 namespace Keycloak\User;
 
+use JsonException;
 use Keycloak\Exception\KeycloakException;
 use Keycloak\KeycloakClient;
 use Keycloak\Service\CreateResponseService;
@@ -51,6 +52,7 @@ class UserApi
      * @Link https://www.keycloak.org/docs-api/7.0/rest-api/index.html#_getusers
      * @return User[]
      * @throws KeycloakException
+     * @throws JsonException
      */
     public function findAll(array $query = []): array
     {
@@ -63,7 +65,7 @@ class UserApi
             ->getContents();
         return array_map(static function ($userArr): User {
             return User::fromJson($userArr);
-        }, json_decode($json, true));
+        }, json_decode($json, true, 512, JSON_THROW_ON_ERROR));
     }
 
     /**
@@ -126,7 +128,7 @@ class UserApi
     /**
      * @param string $id
      * @return Role[]
-     * @throws KeycloakException
+     * @throws KeycloakException|JsonException
      */
     public function getRoles(string $id): array
     {
@@ -134,7 +136,7 @@ class UserApi
             ->sendRequest('GET', "users/$id/role-mappings")
             ->getBody()
             ->getContents();
-        $roleArr = json_decode($roleJson, true);
+        $roleArr = json_decode($roleJson, true, 512, JSON_THROW_ON_ERROR);
 
         $realmRoles = !empty($roleArr['realmMappings'])
             ? array_map(RoleTransformer::createRoleTransformer(null), $roleArr['realmMappings'])
@@ -151,6 +153,7 @@ class UserApi
      * @param string $clientId
      * @return Role[]
      * @throws KeycloakException
+     * @throws JsonException
      */
     public function getClientRoles(string $id, string $clientId): array
     {
@@ -159,7 +162,7 @@ class UserApi
             ->getBody()
             ->getContents();
 
-        $clientRolesArr = json_decode($clientRolesJson, true);
+        $clientRolesArr = json_decode($clientRolesJson, true, 512, JSON_THROW_ON_ERROR);
         return array_map(RoleTransformer::createRoleTransformer($clientId), $clientRolesArr);
     }
 
@@ -168,6 +171,7 @@ class UserApi
      * @param string $clientId
      * @return Role[]
      * @throws KeycloakException
+     * @throws JsonException
      */
     public function getAvailableClientRoles(string $id, string $clientId): array
     {
@@ -176,7 +180,7 @@ class UserApi
             ->getBody()
             ->getContents();
 
-        $clientRolesArr = json_decode($clientRolesJson, true);
+        $clientRolesArr = json_decode($clientRolesJson, true, 512, JSON_THROW_ON_ERROR);
         return array_map(RoleTransformer::createRoleTransformer($clientId), $clientRolesArr);
     }
 
@@ -251,6 +255,7 @@ class UserApi
 
     /**
      * @return array
+     * @throws JsonException
      */
     public function getRequiredActions(): array
     {
@@ -259,7 +264,7 @@ class UserApi
             ->getBody()
             ->getContents();
 
-        $requiredActionsArr = json_decode($requiredActionsJson, true);
+        $requiredActionsArr = json_decode($requiredActionsJson, true, 512, JSON_THROW_ON_ERROR);
         return array_map(static function ($action) {
             return $action['alias'];
         }, $requiredActionsArr);
@@ -269,6 +274,7 @@ class UserApi
     /**
      * @param string $id
      * @return array
+     * @throws JsonException
      */
     public function getCredentials(string $id): array
     {
@@ -279,7 +285,7 @@ class UserApi
 
         return array_map(static function ($credentialsArr): Credential {
             return Credential::fromJson($credentialsArr);
-        }, json_decode($credentialsJson, true));
+        }, json_decode($credentialsJson, true, 512, JSON_THROW_ON_ERROR));
     }
 
     /**
