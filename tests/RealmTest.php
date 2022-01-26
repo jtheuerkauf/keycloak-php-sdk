@@ -91,6 +91,8 @@ final class RealmTest extends TestCase
         $this->assertNotEmpty($executions);
 
         $this->realmApi->deleteAuthenticationFlowExecution($executionId);
+        $this->realmApi->deleteAuthenticationConfig($configId);
+
         $executions = $this->realmApi->getAuthenticationFlowExecutions('php-unit');
         $this->assertEmpty($executions);
     }
