@@ -54,7 +54,7 @@ class AuthenticationFlow implements JsonSerializable, JsonDeserializable
             $arr['id'],
             $arr['alias'],
             $arr['description'],
-            $arr['providerId'],
+            $arr['providerId'] ?? '',
             $arr['topLevel'] ?? false,
             $arr['buildIn'] ?? false,
             $arr['authenticationExecutions'] ?? []

@@ -163,4 +163,9 @@ class RealmApi
         $res = $this->client->sendRequest('POST', "authentication/executions/$executionId/config", $config);
         return CreateResponseService::handleCreateResponse($res);
     }
+
+    public function deleteAuthenticationConfig(string $configId): void
+    {
+        $this->client->sendRequest('DELETE', "authentication/config/$configId");
+    }
 }
