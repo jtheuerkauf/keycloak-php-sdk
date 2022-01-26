@@ -55,7 +55,7 @@ class AuthenticationExecution implements JsonSerializable, JsonDeserializable
             $arr['requirement'],
             $arr['requirementChoices'] ?? [],
             $arr['configurable'],
-            $arr['providerId'],
+            $arr['providerId'] ?? '',
             $arr['level'],
             $arr['index'],
         );
