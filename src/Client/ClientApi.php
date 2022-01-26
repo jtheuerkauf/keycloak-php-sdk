@@ -6,12 +6,12 @@ use JsonException;
 use Keycloak\Client\Entity\Client;
 use Keycloak\Exception\KeycloakException;
 use Keycloak\KeycloakClient;
+use Keycloak\Service\CreateResponseService;
 use Keycloak\User\Entity\CompositeRole;
 use Keycloak\Client\Entity\Role;
-use Psr\Http\Message\ResponseInterface;
 use Keycloak\User\Entity\User;
 
-class Api
+class ClientApi
 {
     /**
      * @var KeycloakClient
@@ -161,16 +161,7 @@ class Api
     public function createRole(Role $role, string $clientId): string
     {
         $res = $this->client->sendRequest('POST', "clients/$clientId/roles", $role);
-
-        if ($res->getStatusCode() === 201) {
-            return $this->extractRIDFromCreateResponse($res);
-        }
-
-        $error = json_decode($res->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR) ?? [];
-        if (!empty($error['errorMessage']) && $res->getStatusCode() === 409) {
-            throw new KeycloakException($error['errorMessage']);
-        }
-        throw new KeycloakException('Something went wrong while creating role');
+        return CreateResponseService::handleCreateResponse($res);
     }
 
     /**
@@ -210,22 +201,6 @@ class Api
     public function deleteRole(string $roleName, string $clientId): void
     {
         $this->client->sendRequest('DELETE', "clients/$clientId/roles/" . $roleName);
-    }
-
-    /**
-     * @param ResponseInterface $res
-     * @return string
-     * @throws KeycloakException
-     */
-    private function extractRIDFromCreateResponse(ResponseInterface $res): string
-    {
-        $locationHeaders = $res->getHeader('Location');
-        $newRoleUrl = reset($locationHeaders);
-        if ($newRoleUrl === false) {
-            throw new KeycloakException('Created role but no Location header received');
-        }
-        $urlParts = array_reverse(explode('/', $newRoleUrl));
-        return reset($urlParts);
     }
 
     /**

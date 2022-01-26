@@ -1,6 +1,6 @@
 <?php
 
-use Keycloak\Client\Api as ClientApi;
+use Keycloak\Client\ClientApi as ClientApi;
 use Keycloak\Client\Entity\Client;
 use Keycloak\Exception\KeycloakException;
 use Keycloak\Client\Entity\Role;
@@ -59,7 +59,7 @@ class ClientRoleTest extends TestCase
 
     public function testCreateRole(): void
     {
-        $client = $this->clientApi->findByClientId($_SERVER['KC_CLIENT_ID']);
+        $client = $this->clientApi->findByClientId('realm-management');
         self::assertInstanceOf(Client::class, $client);
         $existingRole = $this->clientApi->getRole($this->role, $client->id);
         if ($existingRole !== null) {
@@ -72,7 +72,7 @@ class ClientRoleTest extends TestCase
 
     public function testUpdateRole(): void
     {
-        $client = $this->clientApi->findByClientId($_SERVER['KC_CLIENT_ID']);
+        $client = $this->clientApi->findByClientId('realm-management');
         self::assertInstanceOf(Client::class, $client);
         $this->clientApi->updateRole($this->role, $client->id);
         $this->role = $this->clientApi->getRole($this->role, $client->id);
@@ -81,7 +81,7 @@ class ClientRoleTest extends TestCase
 
     public function testCreatePermissions(): void
     {
-        $client = $this->clientApi->findByClientId($_SERVER['KC_CLIENT_ID']);
+        $client = $this->clientApi->findByClientId('realm-management');
         $permission1 = $this->clientApi->createRole($this->permission1, $client->id);
         self::assertNotEmpty($permission1);
         $permission2 = $this->clientApi->createRole($this->permission2, $client->id);
@@ -90,7 +90,7 @@ class ClientRoleTest extends TestCase
 
     public function testAddPermissionsToRole(): void
     {
-        $client = $this->clientApi->findByClientId($_SERVER['KC_CLIENT_ID']);
+        $client = $this->clientApi->findByClientId('realm-management');
         $this->role->name = 'role';
         $role = $this->clientApi->getRole($this->role, $client->id);
         $permissions = [
@@ -103,7 +103,7 @@ class ClientRoleTest extends TestCase
 
     public function testDeletePermissions(): void
     {
-        $client = $this->clientApi->findByClientId($_SERVER['KC_CLIENT_ID']);
+        $client = $this->clientApi->findByClientId('realm-management');
         $this->clientApi->deleteRole($this->permission1->name, $client->id);
         $deletedPermission1 = $this->clientApi->getRole($this->permission1, $client->id);
         $this->clientApi->deleteRole($this->permission2->name, $client->id);
@@ -111,8 +111,6 @@ class ClientRoleTest extends TestCase
         $this->assertNull($deletedPermission1);
         $this->assertNull($deletedPermission2);
     }
-
-
 
     public function testGetRoles(): void
     {
@@ -127,14 +125,16 @@ class ClientRoleTest extends TestCase
 
     public function testGetCompositeRoles(): void
     {
-        $compositeRoles = $this->clientApi->getCompositeRoles('07e9ea75-b6f0-40b7-9bd3-b2d591b37e47');
+        $client = $this->clientApi->findByClientId('realm-management');
+        $compositeRoles = $this->clientApi->getCompositeRoles($client->id);
         $this->assertNotEmpty($compositeRoles);
         $this->assertInstanceOf(Role::class, $compositeRoles[0]);
     }
 
     public function testGetCompositesFromRole(): void
     {
-        $compositeRoles = $this->clientApi->getCompositesFromRole('07e9ea75-b6f0-40b7-9bd3-b2d591b37e47', 'manage-account');
+        $client = $this->clientApi->findByClientId('realm-management');
+        $compositeRoles = $this->clientApi->getCompositesFromRole($client->id, 'realm-admin');
         $this->assertNotEmpty($compositeRoles);
         $this->assertInstanceOf(Role::class, $compositeRoles[0]);
     }

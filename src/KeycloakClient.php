@@ -1,4 +1,5 @@
 <?php
+
 namespace Keycloak;
 
 use Exception;
@@ -22,37 +23,39 @@ class KeycloakClient
     private $guzzleClient;
 
     /**
+     * @var string
+     */
+    private $realm;
+
+    /**
      * KeycloakClient constructor.
      * @param string $clientId
      * @param string $clientSecret
      * @param string $realm
      * @param string $url
+     * @param string|null $altAuthRealm
      */
     public function __construct(
         string $clientId,
         string $clientSecret,
         string $realm,
-        string $url
+        string $url,
+        ?string $altAuthRealm = null
     ) {
+        $this->realm = $realm;
+
+        $authRealm = $altAuthRealm ?: $realm;
         $this->oauthProvider = new GenericProvider([
             'clientId' => $clientId,
             'clientSecret' => $clientSecret,
-            'urlAccessToken' => "$url/auth/realms/$realm/protocol/openid-connect/token",
+            'urlAccessToken' => "$url/auth/realms/$authRealm/protocol/openid-connect/token",
             'urlAuthorize' => '',
-            'urlResourceOwnerDetails' => ''
+            'urlResourceOwnerDetails' => '',
         ]);
-        $this->guzzleClient = new GuzzleClient(['base_uri' => "$url/auth/admin/realms/$realm/"]);
+        $this->guzzleClient = new GuzzleClient(['base_uri' => "$url/auth/admin/realms/"]);
     }
 
-    /**
-     * @param string $method
-     * @param string $uri
-     * @param mixed $body
-     * @param array $headers
-     * @return ResponseInterface
-     * @throws KeycloakException
-     */
-    public function sendRequest(string $method, string $uri, $body = null, array $headers = []): ResponseInterface
+    public function sendRealmlessRequest(string $method, string $uri, $body = null, array $headers = []): ResponseInterface
     {
         try {
             $accessToken = $this->oauthProvider->getAccessToken('client_credentials');
@@ -80,6 +83,24 @@ class KeycloakClient
                 $ex
             );
         }
+    }
+
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param mixed $body
+     * @param array $headers
+     * @return ResponseInterface
+     * @throws KeycloakException
+     */
+    public function sendRequest(string $method, string $uri, $body = null, array $headers = []): ResponseInterface
+    {
+        return $this->sendRealmlessRequest(
+            $method,
+            "{$this->realm}/$uri",
+            $body,
+            $headers
+        );
     }
 
     /**

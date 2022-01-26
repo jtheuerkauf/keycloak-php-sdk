@@ -24,7 +24,7 @@ $kcClient = new Keycloak\KeycloakClient(
 Then you can pass the client to any of the APIs.
 
 ```php
-$userApi = new Keycloak\User\Api($kcClient);
+$userApi = new Keycloak\User\UserApi($kcClient);
 $allUsers = $userApi->findAll();
 ```
 
@@ -36,6 +36,15 @@ These are the platforms which are officially supported by this package. Any othe
 | --- | ---: |
 | PHP | 7.3 |
 | Keycloak | 11 |
+
+### Running tests
+Despite recommendations against it, all tests are executed on a live keycloak environment.
+
+- Create a client on the master realm.
+  - Access Type: confidential
+  - Service Accounts Enabled: true
+  - on tab service account roles attach admin permissions
+- Create `/tests/.env.local` and configure your parameters, see `/tests/.env` for an example.
 
 ### Contributing
 

@@ -1,8 +1,8 @@
 <?php
 
 use Keycloak\Exception\KeycloakException;
-use Keycloak\User\Api as UserApi;
-use Keycloak\Client\Api as ClientApi;
+use Keycloak\User\UserApi;
+use Keycloak\Client\ClientApi;
 use Keycloak\User\Entity\Role;
 use Keycloak\User\Entity\User;
 use PHPUnit\Framework\TestCase;
@@ -139,36 +139,8 @@ final class UserTest extends TestCase
     {
         $user = $this->getUser();
         $roles = $this->userApi->getRoles($user->id);
-        $this->assertNotEmpty($roles);
-
-        $realmRoles = array_filter($roles, static function (Role $role): bool {
-            return !$role->clientRole;
-        });
-        $this->assertGreaterThan(0, count($realmRoles));
-
-        $clientRoles = array_filter($roles, static function (Role $role): bool {
-            return $role->clientRole;
-        });
-        $this->assertGreaterThan(0, count($clientRoles));
-    }
-
-    public function testListClientRoles(): void
-    {
-        $user = $this->getUser();
-        $client = $this->clientApi->findByClientId('account');
-        $clientRoles = $this->userApi->getClientRoles($user->id, $client->id);
-        $this->assertNotEmpty($clientRoles);
-
-        $client = $this->clientApi->findByClientId('realm-management');
-        $availableRoles = $this->userApi->getAvailableClientRoles($user->id, $client->id);
-        $this->assertNotEmpty($availableRoles);
-
-        foreach (array_merge($clientRoles, $availableRoles) as $role) {
-            $this->assertInstanceOf(Role::class, $role);
-        }
-
-        $this->expectException(KeycloakException::class);
-        $this->userApi->getClientRoles($user->id, 'blipblop');
+        $this->assertCount(1, $roles);
+        $this->assertEquals('default-roles-' . $_SERVER['KC_REALM'], $roles[0]->name);
     }
 
     public function testAddClientRole(): void
@@ -202,8 +174,8 @@ final class UserTest extends TestCase
         $availableRolesAfterAdd = $this->userApi->getAvailableClientRoles($user->id, $client->id);
         $this->assertLessThan(count($availableRoles), count($availableRolesAfterAdd));
     }
-    
-    public function testAddClientRoleWithMinimalInfo(): void 
+
+    public function testAddClientRoleWithMinimalInfo(): void
     {
         $user = $this->getUser();
         $client = $this->clientApi->findByClientId('realm-management');
@@ -234,6 +206,25 @@ final class UserTest extends TestCase
         $this->assertLessThan(count($availableRoles), count($availableRolesAfterAdd));
     }
 
+    public function testListClientRoles(): void
+    {
+        $user = $this->getUser();
+        $client = $this->clientApi->findByClientId('realm-management');
+        $clientRoles = $this->userApi->getClientRoles($user->id, $client->id);
+        $this->assertNotEmpty($clientRoles);
+
+        $client = $this->clientApi->findByClientId('realm-management');
+        $availableRoles = $this->userApi->getAvailableClientRoles($user->id, $client->id);
+        $this->assertNotEmpty($availableRoles);
+
+        foreach (array_merge($clientRoles, $availableRoles) as $role) {
+            $this->assertInstanceOf(Role::class, $role);
+        }
+
+        $this->expectException(KeycloakException::class);
+        $this->userApi->getClientRoles($user->id, 'blipblop');
+    }
+
     public function testDeleteClientRoles(): void
     {
         $user = $this->getUser();
@@ -246,15 +237,15 @@ final class UserTest extends TestCase
 
     public function testSendRequiredActionsEmail(): void
     {
-        $this->expectNotToPerformAssertions();
         $user = $this->getUser();
+        $this->expectExceptionMessageMatches('/Failed to send execute actions email/');
         $this->userApi->sendRequiredActionsEmail($user->id, ['UPDATE_PASSWORD']);
     }
 
     public function testSendVerifyEmail(): void
     {
-        $this->expectNotToPerformAssertions();
         $user = $this->getUser();
+        $this->expectExceptionMessageMatches('/Failed to send execute actions email/');
         $this->userApi->sendVerifyEmail($user->id);
     }
 
