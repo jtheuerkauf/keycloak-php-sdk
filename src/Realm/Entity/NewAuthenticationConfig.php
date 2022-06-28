@@ -6,7 +6,7 @@ namespace Keycloak\Realm\Entity;
 
 use JsonSerializable;
 
-final class NewAuthenticationConfig implements JsonSerializable
+class NewAuthenticationConfig implements JsonSerializable
 {
     /** @var string */
     public $alias;

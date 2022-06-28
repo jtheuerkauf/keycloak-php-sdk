@@ -12,7 +12,7 @@ class AuthenticationExecution implements JsonSerializable, JsonDeserializable
     /** @var string */
     public $id;
     /** @var string */
-    public $alias;
+    public $displayName;
     /** @var string */
     public $requirement;
     /** @var array|string[] */
@@ -30,7 +30,7 @@ class AuthenticationExecution implements JsonSerializable, JsonDeserializable
 
     public function __construct(
         string $id,
-        string $alias,
+        string $displayName,
         string $requirement,
         array $requirementChoices,
         bool $configurable,
@@ -40,7 +40,7 @@ class AuthenticationExecution implements JsonSerializable, JsonDeserializable
         int $index
     ) {
         $this->id = $id;
-        $this->alias = $alias;
+        $this->displayName = $displayName;
         $this->requirement = $requirement;
         $this->requirementChoices = $requirementChoices;
         $this->configurable = $configurable;
@@ -55,7 +55,7 @@ class AuthenticationExecution implements JsonSerializable, JsonDeserializable
         $arr = is_array($json) ? $json : json_decode($json, true);
         return new self(
             $arr['id'],
-            $arr['alias'] ?? '',
+            $arr['displayName'] ?? '',
             $arr['requirement'],
             $arr['requirementChoices'] ?? [],
             $arr['configurable'],
