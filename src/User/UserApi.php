@@ -150,6 +150,56 @@ class UserApi
 
     /**
      * @param string $id
+     * @return Role[]
+     * @throws JsonException
+     */
+    public function getRealmRoles(string $id): array
+    {
+        $realmRolesJson = $this->client
+            ->sendRequest('GET', "users/$id/role-mappings/realm")
+            ->getBody()
+            ->getContents();
+
+        $realmRolesArr = json_decode($realmRolesJson, true, 512, JSON_THROW_ON_ERROR);
+        return array_map(RoleTransformer::createRoleTransformer(null), $realmRolesArr);
+    }
+
+    /**
+     * @param string $id
+     * @return Role[]
+     * @throws JsonException
+     */
+    public function getAvailableRealmRoles(string $id): array
+    {
+        $realmRolesJson = $this->client
+            ->sendRequest('GET', "users/$id/role-mappings/realm/available")
+            ->getBody()
+            ->getContents();
+
+        $realmRolesArr = json_decode($realmRolesJson, true, 512, JSON_THROW_ON_ERROR);
+        return array_map(RoleTransformer::createRoleTransformer(null), $realmRolesArr);
+    }
+
+    public function addRealmRoles(string $id, array $rolesToAdd): void
+    {
+        $this->client->sendRequest(
+            'POST',
+            "users/$id/role-mappings/realm",
+            array_map([RoleTransformer::class, 'toMinimalIdentifiableRole'], $rolesToAdd)
+        );
+    }
+
+    public function deleteRealmRoles(string $id, array $rolesToDelete): void
+    {
+        $this->client->sendRequest(
+            'DELETE',
+            "users/$id/role-mappings/realm",
+            array_map([RoleTransformer::class, 'toMinimalIdentifiableRole'], $rolesToDelete)
+        );
+    }
+
+    /**
+     * @param string $id
      * @param string $clientId
      * @return Role[]
      * @throws KeycloakException
