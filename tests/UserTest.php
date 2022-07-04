@@ -144,6 +144,55 @@ final class UserTest extends TestCase
         $this->assertEquals('default-roles-' . $_SERVER['KC_REALM'], $roles[0]->name);
     }
 
+    public function testRealmRoles(): void
+    {
+        $user = $this->getUser();
+        $roles = $this->userApi->getRealmRoles($user->id);
+        $this->assertCount(1, $roles);
+        $this->assertEquals('default-roles-' . $_SERVER['KC_REALM'], $roles[0]->name);
+    }
+
+    public function testAvailableRealmRoles(): void
+    {
+        $user = $this->getUser();
+        $availableRoles = $this->userApi->getAvailableRealmRoles($user->id);
+        $this->assertCount(2, $availableRoles);
+    }
+
+    public function testAddRealmRole(): void
+    {
+        $user = $this->getUser();
+        $availableRoles = $this->userApi->getAvailableRealmRoles($user->id);
+
+        $roleToAdd = null;
+        foreach ($availableRoles as $role) {
+            if ($role->name === 'offline_access') {
+                $roleToAdd = $role;
+                break;
+            }
+        }
+        $this->userApi->addRealmRoles($user->id, [$roleToAdd]);
+        $roles = $this->userApi->getRealmRoles($user->id);
+        $this->assertCount(2, $roles);
+    }
+
+    public function testDeleteRealmRole(): void
+    {
+        $user = $this->getUser();
+        $roles = $this->userApi->getRealmRoles($user->id);
+
+        $roleToDelete = null;
+        foreach ($roles as $role) {
+            if ($role->name === 'offline_access') {
+                $roleToDelete = $role;
+                break;
+            }
+        }
+        $this->userApi->deleteRealmRoles($user->id, [$roleToDelete]);
+        $roles = $this->userApi->getRealmRoles($user->id);
+        $this->assertCount(1, $roles);
+    }
+
     public function testAddClientRole(): void
     {
         $user = $this->getUser();
