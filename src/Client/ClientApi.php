@@ -164,6 +164,16 @@ class ClientApi
         return CreateResponseService::handleCreateResponse($res);
     }
 
+    public function addPermissionsByRoleId(string $roleId, array $permissions): void
+    {
+        $this->client->sendRequest('POST', "roles-by-id/$roleId/composites", $permissions);
+    }
+
+    public function deletePermissionsByRoleId(string $roleId, array $permissions): void
+    {
+        $this->client->sendRequest('DELETE', "roles-by-id/$roleId/composites", $permissions);
+    }
+
     /**
      * @param Role $role
      * @param string $clientId

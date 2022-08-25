@@ -119,4 +119,10 @@ final class RealmTest extends TestCase
         }
         $this->assertNull($authenticationFlowId);
     }
+
+    public function testGetRoles(): void
+    {
+        $roles = $this->realmApi->getRoles();
+        $this->assertCount(3,$roles);
+    }
 }

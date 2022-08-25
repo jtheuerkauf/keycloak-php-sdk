@@ -101,6 +101,38 @@ class ClientRoleTest extends TestCase
         $this->assertEquals('role', $this->role->name);
     }
 
+    public function testDeletePermissionsByRoleId(): void
+    {
+        $client = $this->clientApi->findByClientId('realm-management');
+        $this->role->name = 'role';
+        $role = $this->clientApi->getRole($this->role, $client->id);
+
+        $permissionsBeforeDeletion = $this->clientApi->getCompositesFromRole($client->id, $role->name);
+        $this->assertCount(2, $permissionsBeforeDeletion);
+
+        $permission = $this->clientApi->getRole($this->permission1, $client->id);
+        $this->clientApi->deletePermissionsByRoleId($role->id, [$permission]);
+        $permissionsAfterDeletion = $this->clientApi->getCompositesFromRole($client->id, $role->name);
+        $this->assertCount(1, $permissionsAfterDeletion);
+    }
+
+    public function testAddPermissionsByRoleId(): void
+    {
+        $client = $this->clientApi->findByClientId('realm-management');
+        $role = $this->clientApi->getRole($this->role, $client->id);
+
+        $permissionsBeforeAddition = $this->clientApi->getCompositesFromRole($client->id, $role->name);
+        $this->assertCount(1, $permissionsBeforeAddition);
+
+        $permissions = [
+            $this->clientApi->getRole($this->permission1, $client->id),
+        ];
+        $this->clientApi->addPermissionsByRoleId($role->id, $permissions);
+
+        $permissionsAfterAddition = $this->clientApi->getCompositesFromRole($client->id, $role->name);
+        $this->assertCount(2, $permissionsAfterAddition);
+    }
+
     public function testDeletePermissions(): void
     {
         $client = $this->clientApi->findByClientId('realm-management');

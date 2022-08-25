@@ -13,6 +13,7 @@ use Keycloak\Realm\Entity\NewAuthenticationConfig;
 use Keycloak\Realm\Entity\NewAuthenticationExecution;
 use Keycloak\Realm\Entity\NewAuthenticationFlow;
 use Keycloak\Service\CreateResponseService;
+use Keycloak\User\Entity\Role;
 
 class RealmApi
 {
@@ -167,5 +168,21 @@ class RealmApi
     public function deleteAuthenticationConfig(string $configId): void
     {
         $this->client->sendRequest('DELETE', "authentication/config/$configId");
+    }
+
+    public function getRoles(): array
+    {
+        $json = $this->client->sendRequest('GET', 'roles')
+            ->getBody()
+            ->getContents();
+
+        $jsonDecoded = json_decode($json, true);
+        if ($jsonDecoded === null) {
+            return [];
+        }
+
+        return array_map(static function ($roleArr): Role {
+            return Role::fromJson($roleArr);
+        }, $jsonDecoded);
     }
 }
