@@ -11,12 +11,12 @@ class Role implements JsonSerializable, JsonDeserializable
      * @var string
      */
     public $id;
-    
+
     /**
      * @var string
      */
     public $name;
-    
+
     /**
      * @var string|null
      */
@@ -31,7 +31,7 @@ class Role implements JsonSerializable, JsonDeserializable
      * @var bool
      */
     public $clientRole;
-    
+
     /**
      * @var string|null
      */
@@ -83,7 +83,7 @@ class Role implements JsonSerializable, JsonDeserializable
             $arr['description'] ?? null,
             $arr['composite'] ?? false,
             $arr['clientRole'],
-            $arr['clientId']
+            $arr['clientId'] ?? null
         );
     }
 }

@@ -12,8 +12,8 @@ use Keycloak\Realm\Entity\AuthenticationFlow;
 use Keycloak\Realm\Entity\NewAuthenticationConfig;
 use Keycloak\Realm\Entity\NewAuthenticationExecution;
 use Keycloak\Realm\Entity\NewAuthenticationFlow;
-use Keycloak\Realm\Entity\Role;
 use Keycloak\Service\CreateResponseService;
+use Keycloak\User\Entity\Role;
 
 class RealmApi
 {
