@@ -1,13 +1,13 @@
 <?php
 
+namespace App\Tests;
+
 use Keycloak\Client\ClientApi;
 use Keycloak\Client\Entity\Client;
 use Keycloak\Exception\KeycloakException;
 use Keycloak\Client\Entity\Role;
 use Keycloak\Realm\RealmApi;
 use PHPUnit\Framework\TestCase;
-
-require_once 'TestClient.php';
 
 class ClientRoleTest extends TestCase
 {

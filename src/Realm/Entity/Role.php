@@ -4,10 +4,6 @@ namespace Keycloak\Realm\Entity;
 
 use Keycloak\AbstractRole;
 
-/**
- * Class Role
- * @package Keycloak\Realm\Entity
- */
 class Role extends AbstractRole
 {
     public static function fromJson($json): self

@@ -1,14 +1,11 @@
 <?php
 
+namespace App\Tests;
+
 use Keycloak\Exception\KeycloakCredentialsException;
 use Keycloak\KeycloakClient;
 use PHPUnit\Framework\TestCase;
 
-require_once 'TestClient.php';
-
-/**
- * Class ClientTest
- */
 final class KeycloakClientTest extends TestCase
 {
     public function testInvalidKeycloakClient(): void

@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Tests;
+
 use Keycloak\KeycloakClient;
 
 class TestClient

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace App\Tests;
+
 use Keycloak\Realm\Entity\NewAuthenticationConfig;
 use Keycloak\Realm\Entity\NewAuthenticationExecution;
 use Keycloak\Realm\Entity\NewAuthenticationFlow;
@@ -9,12 +11,9 @@ use Keycloak\Realm\Entity\Role;
 use Keycloak\Realm\RealmApi;
 use PHPUnit\Framework\TestCase;
 
-require_once 'TestClient.php';
-
 final class RealmTest extends TestCase
 {
-    /** @var RealmApi */
-    private $realmApi;
+    private RealmApi $realmApi;
 
     protected function setUp(): void
     {

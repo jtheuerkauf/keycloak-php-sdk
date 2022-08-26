@@ -1,4 +1,4 @@
-image: acweblabs/nginx-php7.3-fpm
+image: acweblabs/nginx-php7.4-fpm
 
 definitions:
   mergeFromMaster: &mergeFromMaster
