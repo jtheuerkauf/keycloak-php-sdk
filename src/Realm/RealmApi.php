@@ -13,12 +13,11 @@ use Keycloak\Realm\Entity\NewAuthenticationConfig;
 use Keycloak\Realm\Entity\NewAuthenticationExecution;
 use Keycloak\Realm\Entity\NewAuthenticationFlow;
 use Keycloak\Service\CreateResponseService;
-use Keycloak\User\Entity\Role;
+use Keycloak\Realm\Entity\Role;
 
 class RealmApi
 {
-    /** @var KeycloakClient */
-    private $client;
+    private KeycloakClient $client;
 
     public function __construct(KeycloakClient $client)
     {

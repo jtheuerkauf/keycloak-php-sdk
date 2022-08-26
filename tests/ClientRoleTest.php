@@ -1,39 +1,27 @@
 <?php
 
-use Keycloak\Client\ClientApi as ClientApi;
+use Keycloak\Client\ClientApi;
 use Keycloak\Client\Entity\Client;
 use Keycloak\Exception\KeycloakException;
 use Keycloak\Client\Entity\Role;
+use Keycloak\Realm\RealmApi;
 use PHPUnit\Framework\TestCase;
 
 require_once 'TestClient.php';
 
 class ClientRoleTest extends TestCase
 {
-    /**
-     * @var ClientApi
-     */
-    protected $clientApi;
-
-    /**
-     * @var Role
-     */
-    protected $role;
-
-    /**
-     * @var Role
-     */
-    protected $permission1;
-
-    /**
-     * @var Role
-     */
-    protected $permission2;
+    protected ClientApi $clientApi;
+    protected RealmApi $realmApi;
+    protected Role $role;
+    protected Role $permission1;
+    protected Role $permission2;
 
     protected function setUp(): void
     {
         global $client;
         $this->clientApi = new ClientApi($client);
+        $this->realmApi = new RealmApi($client);
         $this->role = new Role(
             'roleId',
             'role',
@@ -124,10 +112,8 @@ class ClientRoleTest extends TestCase
         $permissionsBeforeAddition = $this->clientApi->getCompositesFromRole($client->id, $role->name);
         $this->assertCount(1, $permissionsBeforeAddition);
 
-        $permissions = [
-            $this->clientApi->getRole($this->permission1, $client->id),
-        ];
-        $this->clientApi->addPermissionsByRoleId($role->id, $permissions);
+        $permission = $this->realmApi->getRoles()[0];
+        $this->clientApi->addPermissionsByRoleId($role->id, [$permission]);
 
         $permissionsAfterAddition = $this->clientApi->getCompositesFromRole($client->id, $role->name);
         $this->assertCount(2, $permissionsAfterAddition);
