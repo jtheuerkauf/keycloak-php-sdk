@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Tests;
+
 use Keycloak\Exception\KeycloakException;
 use Keycloak\User\UserApi;
 use Keycloak\Client\ClientApi;
@@ -9,8 +11,6 @@ use Keycloak\User\Entity\User;
 use PHPUnit\Framework\TestCase;
 use Keycloak\User\Entity\NewUser;
 
-require_once 'TestClient.php';
-
 /**
  * Class ApiTest
  * These tests are ran synchronously from top to bottom.
@@ -19,20 +19,9 @@ require_once 'TestClient.php';
  */
 final class UserTest extends TestCase
 {
-    /**
-     * @var UserApi
-     */
-    protected $userApi;
-
-    /**
-     * @var ClientApi
-     */
-    protected $clientApi;
-
-    /**
-     * @var NewUser
-     */
-    protected $user;
+    protected UserApi $userApi;
+    protected ClientApi $clientApi;
+    protected NewUser $user;
 
     protected function setUp(): void
     {

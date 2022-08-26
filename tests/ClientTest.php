@@ -1,18 +1,15 @@
 <?php
 
+namespace App\Tests;
+
 use Keycloak\Client\ClientApi;
 use Keycloak\Client\Entity\Client;
 use Keycloak\User\Entity\CompositeRole;
 use PHPUnit\Framework\TestCase;
 
-require_once 'TestClient.php';
-
 class ClientTest extends TestCase
 {
-    /**
-     * @var ClientApi
-     */
-    protected $clientApi;
+    protected ClientApi $clientApi;
 
     protected function setUp(): void
     {
