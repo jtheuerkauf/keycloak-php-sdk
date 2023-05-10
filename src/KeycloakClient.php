@@ -29,30 +29,37 @@ class KeycloakClient
 
     /**
      * KeycloakClient constructor.
-     * @param string $clientId
-     * @param string $clientSecret
-     * @param string $realm
-     * @param string $url
+     *
+     * @param string      $clientId
+     * @param string      $clientSecret
+     * @param string      $realm
+     * @param string      $url
      * @param string|null $altAuthRealm
+     * @param string      $basePath Version 17+ removed the fixed <tt>/auth</tt> base-path.
+     *                              The relative base can still be set with <tt>"--http-relative-path=/..."</tt> when
+     *                              Keycloak is started, so this argument should match that setting.
+     *                              If no relative path is in use: <tt>"/"</tt> or <tt>""</tt>.
      */
     public function __construct(
         string $clientId,
         string $clientSecret,
         string $realm,
         string $url,
-        ?string $altAuthRealm = null
+        ?string $altAuthRealm = null,
+        string $basePath = '/auth'
     ) {
         $this->realm = $realm;
 
+        $baseUrl = trim(rtrim($url, '/') . '/' . ltrim($basePath, '/'), '/');
         $authRealm = $altAuthRealm ?: $realm;
         $this->oauthProvider = new GenericProvider([
             'clientId' => $clientId,
             'clientSecret' => $clientSecret,
-            'urlAccessToken' => "$url/auth/realms/$authRealm/protocol/openid-connect/token",
+            'urlAccessToken' => "{$baseUrl}/realms/{$authRealm}/protocol/openid-connect/token",
             'urlAuthorize' => '',
             'urlResourceOwnerDetails' => '',
         ]);
-        $this->guzzleClient = new GuzzleClient(['base_uri' => "$url/auth/admin/realms/"]);
+        $this->guzzleClient = new GuzzleClient(['base_uri' => "{$baseUrl}/admin/realms/"]);
     }
 
     public function sendRealmlessRequest(string $method, string $uri, $body = null, array $headers = []): ResponseInterface
