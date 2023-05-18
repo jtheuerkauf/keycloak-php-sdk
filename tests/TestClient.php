@@ -13,9 +13,8 @@ class TestClient
             $_SERVER['KC_CLIENT_SECRET'],
             $_SERVER['KC_REALM'],
             $_SERVER['KC_URL'],
-            'master'
+            $_SERVER['KC_AUTH_REALM'],
+            $_SERVER['KC_API_PATH'],
         );
     }
 }
-
-$client = TestClient::createClient();

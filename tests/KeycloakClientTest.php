@@ -7,6 +7,7 @@ use Keycloak\Exception\KeycloakCredentialsException;
 use Keycloak\KeycloakClient;
 use League\OAuth2\Client\Provider\GenericProvider;
 use PHPUnit\Framework\TestCase;
+use ReflectionProperty;
 
 final class KeycloakClientTest extends TestCase
 {
@@ -19,7 +20,7 @@ final class KeycloakClientTest extends TestCase
 
     public function testValidKeycloakClient(): void
     {
-        global $client;
+        $client = TestClient::createClient();
         $res = $client->sendRequest('GET', '');
         $this->assertEquals(200, $res->getStatusCode());
     }
@@ -138,6 +139,123 @@ final class KeycloakClientTest extends TestCase
             $guzzleClient,
             "The OAuth provider URLs don't match (none as '/')",
         );
+    }
+
+    /**
+     * @test
+     * @throws \ReflectionException
+     */
+    /**
+     * @test
+     * @throws \ReflectionException
+     */
+    public function setCredentials(): void
+    {
+        $client = TestClient::createClient();
+        $reflection = new ReflectionProperty($client, 'credentials');
+        $reflection->setAccessible(true);
+
+        $client->setCredentials('flimflam', 'foo', 'bar');
+        $credentials = $reflection->getValue($client);
+        $this->assertArrayHasKey('flimflam', $credentials);
+        $this->assertSame(['foo', 'bar'], $credentials['flimflam']);
+    }
+
+    /**
+     * @test
+     * @throws \ReflectionException
+     */
+    public function unsetCredentials(): void
+    {
+        $client = TestClient::createClient();
+        $reflection = new ReflectionProperty($client, 'credentials');
+        $reflection->setAccessible(true);
+
+        $client->setCredentials('flimflam', 'foo', 'bar');
+        $credentials = $reflection->getValue($client);
+        $this->assertArrayHasKey('flimflam', $credentials);
+
+        $client->unsetCredentials('flimflam');
+        $credentials = $reflection->getValue($client);
+        $this->assertArrayNotHasKey('flimflam', $credentials);
+    }
+
+    /**
+     * @test
+     * @throws \ReflectionException
+     */
+    public function unsetCredentials_CannotRemoveClientCredentials(): void
+    {
+        $client = TestClient::createClient();
+        $reflection = new ReflectionProperty($client, 'credentials');
+        $reflection->setAccessible(true);
+
+        $this->expectExceptionObject(
+            new KeycloakCredentialsException(
+                '"client_credentials" grant type cannot be removed from the base client',
+            ),
+        );
+        $client->unsetCredentials('client_credentials');
+    }
+
+    /**
+     * @test
+     * @throws \ReflectionException
+     */
+    public function setGrantType_WithNewCredentials(): void
+    {
+        $client = TestClient::createClient();
+        $refCredentials = new ReflectionProperty($client, 'credentials');
+        $refCredentials->setAccessible(true);
+        $refGrantType = new ReflectionProperty($client, 'grantType');
+        $refGrantType->setAccessible(true);
+
+        $client->setGrantType('flimflam', ['foo', 'bar']);
+        $credentials = $refCredentials->getValue($client);
+        $this->assertArrayHasKey('flimflam', $credentials);
+        $this->assertSame(['foo', 'bar'], $credentials['flimflam']);
+        $grantType = $refGrantType->getValue($client);
+        $this->assertSame('flimflam', $grantType);
+    }
+
+    /**
+     * @test
+     * @throws \ReflectionException
+     */
+    public function setGrantType_WithOnlyExistingCredentials(): void
+    {
+        $client = TestClient::createClient();
+        $refCredentials = new ReflectionProperty($client, 'credentials');
+        $refCredentials->setAccessible(true);
+        $refGrantType = new ReflectionProperty($client, 'grantType');
+        $refGrantType->setAccessible(true);
+
+        $client->setCredentials('flipflop', 'bleep', 'bloop');
+        $client->setCredentials('flimflam', 'foo', 'bar');
+        $grantType = $refGrantType->getValue($client);
+        $this->assertSame('client_credentials', $grantType);
+
+        $client->setGrantType('flipflop');
+        $grantType = $refGrantType->getValue($client);
+        $this->assertSame('flipflop', $grantType);
+    }
+
+    /**
+     * @test
+     * @throws \ReflectionException
+     */
+    public function setGrantType_WithoutAnyCredentials(): void
+    {
+        $client = TestClient::createClient();
+        $refCredentials = new ReflectionProperty($client, 'credentials');
+        $refCredentials->setAccessible(true);
+        $refGrantType = new ReflectionProperty($client, 'grantType');
+        $refGrantType->setAccessible(true);
+
+        $client->setCredentials('flimflam', 'foo', 'bar');
+
+        $this->expectException(KeycloakCredentialsException::class);
+        $client->setGrantType('flipflop');
     }
 
     /**

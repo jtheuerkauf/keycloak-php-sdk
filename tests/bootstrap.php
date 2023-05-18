@@ -1,16 +1,17 @@
 <?php
 
+/*
+ * Use this bootstrap when you have legit Keycloak URL and credentials to test with.
+ */
+
 declare(strict_types=1);
 
+use App\Tests\TestClient;
 use Keycloak\Realm\RealmApi;
-use Symfony\Component\Dotenv\Dotenv;
 
-require_once 'vendor/autoload.php';
+require __DIR__ . '/environment.php';
 
-(new Dotenv(false))->loadEnv(__DIR__ . '/.env');
-
-require_once 'TestClient.php';
-
+$client = TestClient::createClient();
 $realmApi = new RealmApi($client);
 $existingRealm = $realmApi->find();
 

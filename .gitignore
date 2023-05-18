@@ -2,6 +2,9 @@
 vendor/
 
 .phpunit.result.cache
+tests/.env
 tests/.env.*
 tests/credentials.json
 error_*
+
+!tests/.env.sample

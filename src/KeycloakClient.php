@@ -8,27 +8,33 @@ use GuzzleHttp\Exception\GuzzleException;
 use Keycloak\Exception\KeycloakCredentialsException;
 use Keycloak\Exception\KeycloakException;
 use League\OAuth2\Client\Provider\GenericProvider;
+use League\OAuth2\Client\Token\AccessTokenInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class KeycloakClient
 {
+    private array $credentials = [];
     /**
      * @var GenericProvider
      */
-    private $oauthProvider;
-
+    private GenericProvider $oauthProvider;
     /**
      * @var GuzzleClient
      */
-    private $guzzleClient;
-
+    private GuzzleClient $guzzleClient;
     /**
      * @var string
      */
-    private $realm;
+    private string $realm;
+
+    private string $grantType = 'client_credentials';
 
     /**
      * KeycloakClient constructor.
+     *
+     * @deprecated This constructor signature will change to support a "credentials" array
+     *             where ID/Secret pairs are keyed by grant-type.
+     *             $basePath will also change to empty string as default to align with more recent versions of Keycloak.
      *
      * @param string      $clientId
      * @param string      $clientSecret
@@ -42,6 +48,7 @@ class KeycloakClient
      */
     public function __construct(
         string $clientId,
+        #[\SensitiveParameter]
         string $clientSecret,
         string $realm,
         string $url,
@@ -49,23 +56,74 @@ class KeycloakClient
         string $basePath = '/auth'
     ) {
         $this->realm = $realm;
-
+        $this->setCredentials('client_credentials', $clientId, $clientSecret);
         $baseUrl = trim(rtrim($url, '/') . '/' . ltrim($basePath, '/'), '/');
         $authRealm = $altAuthRealm ?: $realm;
-        $this->oauthProvider = new GenericProvider([
-            'clientId' => $clientId,
-            'clientSecret' => $clientSecret,
-            'urlAccessToken' => "{$baseUrl}/realms/{$authRealm}/protocol/openid-connect/token",
-            'urlAuthorize' => '',
-            'urlResourceOwnerDetails' => '',
-        ]);
+        $this->oauthProvider = new GenericProvider(
+            [
+                'clientId' => $clientId,
+                'clientSecret' => $clientSecret,
+                'urlAccessToken' => "{$baseUrl}/realms/{$authRealm}/protocol/openid-connect/token",
+                'urlAuthorize' => '',
+                'urlResourceOwnerDetails' => '',
+            ]
+        );
         $this->guzzleClient = new GuzzleClient(['base_uri' => "{$baseUrl}/admin/realms/"]);
     }
 
-    public function sendRealmlessRequest(string $method, string $uri, $body = null, array $headers = []): ResponseInterface
+    public function getClientCredentials()
     {
+        return $this->credentials['client_credentials'];
+    }
+
+    public function setCredentials(
+        string $grantType,
+        string $identity,
+        #[\SensitiveParameter]
+        string $secret
+    ): self {
+        $this->credentials[strtolower($grantType)] = [$identity, $secret];
+
+        return $this;
+    }
+
+    public function setGrantType(
+        string $grantType,
+        #[\SensitiveParameter]
+        array $credentials = []
+    ): self {
+        if (empty($this->credentials[$grantType]) && count($credentials) !== 2) {
+            throw new KeycloakCredentialsException(
+                'Cannot use grant type "%s": credentials not found, and were not provided'
+            );
+        }
+        $this->grantType = $grantType;
+        if ($credentials) {
+            $this->setCredentials($grantType, ...array_values($credentials));
+        }
+
+        return $this;
+    }
+
+    public function unsetCredentials(string $grantType): void
+    {
+        if ($grantType !== 'client_credentials') {
+            unset($this->credentials[$grantType]);
+        } else {
+            throw new KeycloakCredentialsException(
+                '"client_credentials" grant type cannot be removed from the base client',
+            );
+        }
+    }
+
+    public function sendRealmlessRequest(
+        string $method,
+        string $uri,
+        $body = null,
+        array $headers = []
+    ): ResponseInterface {
         try {
-            $accessToken = $this->oauthProvider->getAccessToken('client_credentials');
+            $accessToken = $this->getAccessToken();
         } catch (Exception $ex) {
             throw new KeycloakCredentialsException();
         }
@@ -95,13 +153,18 @@ class KeycloakClient
     /**
      * @param string $method
      * @param string $uri
-     * @param mixed $body
-     * @param array $headers
+     * @param mixed  $body
+     * @param array  $headers
+     *
      * @return ResponseInterface
      * @throws KeycloakException
      */
-    public function sendRequest(string $method, string $uri, $body = null, array $headers = []): ResponseInterface
-    {
+    public function sendRequest(
+        string $method,
+        string $uri,
+        $body = null,
+        array $headers = []
+    ): ResponseInterface {
         return $this->sendRealmlessRequest(
             $method,
             "{$this->realm}/$uri",
@@ -116,5 +179,30 @@ class KeycloakClient
     public function getOAuthProvider(): GenericProvider
     {
         return $this->oauthProvider;
+    }
+
+    private function getAccessToken(): AccessTokenInterface
+    {
+        switch ($this->grantType) {
+            case 'client_credentials':
+                $credentials = $this->credentials['client_credentials'] ?? null;
+                if ($credentials) {
+                    $bodyKeys = ['client_id', 'client_secret'];
+                }
+                break;
+            case 'password':
+                $credentials = $this->credentials['password'] ?? null;
+                if ($credentials) {
+                    $bodyKeys = ['username', 'password'];
+                }
+                break;
+            default:
+                throw new KeycloakException(sprintf('Unsupported grant type: "%s"', $this->grantType));
+        }
+        if (!$credentials) {
+            throw new KeycloakException('Unable to find usable authentication credentials');
+        }
+
+        return $this->oauthProvider->getAccessToken($this->grantType, array_combine($bodyKeys, $credentials));
     }
 }
