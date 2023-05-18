@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="RealmTest" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
+    <TestRunner bootstrap_file="$PROJECT_DIR$/tests/online-bootstrap.php" class="App\Tests\RealmTest" file="$PROJECT_DIR$/tests/RealmTest.php" scope="Class" use_alternative_bootstrap_file="true" />
+    <method v="2" />
+  </configuration>
+</component>

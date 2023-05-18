@@ -21,7 +21,7 @@ final class KeycloakClientTest extends TestCase
     public function testValidKeycloakClient(): void
     {
         $client = TestClient::createClient();
-        $res = $client->sendRequest('GET', '');
+        $res = $client->sendRequest('OPTIONS', '');
         $this->assertEquals(200, $res->getStatusCode());
     }
 

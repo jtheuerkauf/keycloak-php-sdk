@@ -1,27 +1,20 @@
 <?php
 
 /*
- * Use this bootstrap when you have legit Keycloak URL and credentials to test with.
+ * Use this bootstrap for minimal localized testing.
  */
 
 declare(strict_types=1);
 
-use App\Tests\TestClient;
-use Keycloak\Realm\RealmApi;
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-require __DIR__ . '/environment.php';
-
-$client = TestClient::createClient();
-$realmApi = new RealmApi($client);
-$existingRealm = $realmApi->find();
-
-if ($existingRealm !== null) {
-    $client->sendRequest('DELETE', '');
+$ini = parse_ini_file(__DIR__ . '/.env', false, INI_SCANNER_TYPED);
+$_ENV ??= [];
+foreach ($ini as $name => $value) {
+    if (!array_key_exists($name, $_ENV)) {
+        $_ENV[$name] = $value;
+    }
+    if (!array_key_exists($name, $_SERVER)) {
+        $_SERVER[$name] = $value;
+    }
 }
-
-$realm = $_SERVER['KC_REALM'];
-$client->sendRealmlessRequest('POST', '', [
-    'enabled' => true,
-    'id' => $realm,
-    'realm' => $realm
-]);

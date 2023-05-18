@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="KeycloakClientTest" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
+    <TestRunner bootstrap_file="$PROJECT_DIR$/tests/bootstrap.php" class="App\Tests\KeycloakClientTest" file="$PROJECT_DIR$/tests/KeycloakClientTest.php" scope="Class" use_alternative_bootstrap_file="true" />
+    <method v="2" />
+  </configuration>
+</component>

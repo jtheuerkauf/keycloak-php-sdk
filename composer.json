@@ -31,7 +31,7 @@
         "optimize-autoloader": true
     },
     "scripts": {
-        "test": "./vendor/bin/phpunit --bootstrap tests/bootstrap.php --testdox tests"
+        "test": "./vendor/bin/phpunit --bootstrap tests/online-bootstrap.php --testdox tests"
     },
     "autoload": {
         "psr-4": {
